@@ -51,39 +51,27 @@ options:
       - lanplus
       - serial-terminal
     default: lan
-  command:
+  raw_command:
     description:
-      - Ipmitool command. Example: "lan", "sel", "raw", "session" and etc.
-    type: str
-    required: true
-  command_args:
-    description:
-      - Ipmitool command args. Example: "print 1" (used in conjuction with "lan print 1"), "clear" (used in conjuction with "sel clear").
+      - Ipmitool command. Example: "lan print 1", "sel clear"
     type: str
     required: true
 '''
 
 EXAMPLES = r'''
 # Print the current configuration for the given channel.
-ipmitool: command=lan command_args='print 1'
-
-# Clear SEL logs
-ipmitool command=sel command_args=clear
+ipmitool: raw_command='lan print 1'
 '''
 
 RETURN = r'''
+raw_command:
+    description: Command to pass to the ipmitool program.
+    type: str
+    sample: 'lan'
 command_output:
     description: Output of the IPMI command if any. If none, return generic message.
     type: str
     returned: always
-command:
-    description: Command to pass to the ipmitool program.
-    type: str
-    sample: 'lan'
-command_args:
-    description: Arguments to pass along with the command.
-    type: str
-    sample: 'print 1'
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -91,8 +79,7 @@ from ansible.module_utils.basic import AnsibleModule
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
-      command=dict(type='str', required=True),
-      command_args=dict(type='str', required=True)
+      raw_command=dict(type='str', required=True),
     )
     
     result = dict(
@@ -112,12 +99,11 @@ def run_module():
       module.exit_json(**result)
     
     # Ipmitool module logic
-    result['command'] = module.params['command']
-    result['command_args'] = module.params['command_args']
+    result['raw_command'] = module.params['raw_command']
     result['command_output'] = ''
     
-    command = subprocess.Popen('ipmitool {} {}'.format(module.params["command"], module.params["command_args"]),
-                                  stdout=subprocess.PIPE, 
+    command = subprocess.Popen('ipmitool {}'.format(module.params["raw_command"]),
+                                  stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
                                   shell=True,
                                   universal_newlines=True)
