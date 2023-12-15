@@ -6,11 +6,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
-
-try:
-    import subprocess
-except ImportError:
-    module = None
     
 
 DOCUMENTATION = r'''
@@ -72,6 +67,9 @@ command_output:
     description: Output of the IPMI command if any. If none, return generic message.
     type: str
     returned: always
+command_rc:
+    description: Return code of the command.
+    type: str
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -101,13 +99,9 @@ def run_module():
     # Ipmitool module logic
     result['raw_command'] = module.params['raw_command']
     result['command_output'] = ''
+    result['command_rc'] = ''
     
-    command = subprocess.Popen('ipmitool {}'.format(module.params["raw_command"]),
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.PIPE,
-                                  shell=True,
-                                  universal_newlines=True)
-    command_stdout, command_stderr = command.communicate()
+    command_rc, command_stdout, command_stderr = module.run_command('ipmitool {}'.format(module.params["raw_command"]))
     
     if command_stdout:
       if len(command_stdout) == 0:
@@ -116,6 +110,9 @@ def run_module():
         result['command_output'] = command_stdout
     else:
       module.fail_json(msg=command_stderr, **result)
+    
+    # Populate return code regardless of the command outcome
+    result['command_rc'] = command_rc
   
     module.exit_json(**result)
     
