@@ -97,7 +97,7 @@ def run_module():
       module.exit_json(**result)
     
     # Ipmitool module logic
-    result['raw_command'] = module.params['raw_command']
+    result['raw_command'] = 'ipmitool ' + module.params['raw_command']
     result['command_output'] = ''
     result['command_rc'] = ''
     
