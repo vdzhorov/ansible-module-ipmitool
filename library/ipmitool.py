@@ -6,7 +6,8 @@
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
-    
+
+import json    
 
 DOCUMENTATION = r'''
 module: ipmitool
@@ -74,6 +75,9 @@ command_rc:
 
 from ansible.module_utils.basic import AnsibleModule
 
+def pretty_string(string):
+  return string.replace('\n', '')
+
 def run_module():
     # define available arguments/parameters a user can pass to the module
     module_args = dict(
@@ -107,9 +111,9 @@ def run_module():
       if len(command_stdout) == 0:
         result['command_output'] = 'Command returned success.'
       else:
-        result['command_output'] = command_stdout
+        result['command_output'] = pretty_string(command_stdout)
     else:
-      module.fail_json(msg=command_stderr, **result)
+      module.fail_json(msg=pretty_string(command_stderr), **result)
     
     # Populate return code regardless of the command outcome
     result['command_rc'] = command_rc
