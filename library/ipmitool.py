@@ -60,7 +60,7 @@ ipmitool: raw_command='lan print 1'
 
 RETURN = r'''
 raw_command:
-    description: Command to pass to the ipmitool program.
+    description: Command that is actually passed to the ipmitool program.
     type: str
     sample: 'lan'
 command_output:
